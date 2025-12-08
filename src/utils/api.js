@@ -8,6 +8,7 @@ export const postData = async (url, formData) => {
 
         const response = await fetch(apiUrl + url, {
             method: 'POST',
+            credentials: 'include', // Include cookies in the request
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Include
               'Content-Type': 'application/json', // Adjust the content type as needed
@@ -35,6 +36,7 @@ export const fetchDataFromApi = async (url) => {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Include
           'Content-Type': 'application/json', // Adjust the content type as needed
         },
+        withCredentials: true // if your backend sets cookies
       }
 
     const { data } = await axios.get(apiUrl + url, params)
