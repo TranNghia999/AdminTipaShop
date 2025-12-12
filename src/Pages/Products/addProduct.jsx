@@ -310,7 +310,7 @@ const AddProduct = () => {
         setBannerPreviews([])
             setTimeout(() => {
                 setBannerPreviews(imgArr)
-                formFields.bannerPreviews = imgArr
+                formFields.bannerimages = imgArr
             }, 10);
         }
     
