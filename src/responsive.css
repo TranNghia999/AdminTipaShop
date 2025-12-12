@@ -1,0 +1,34 @@
+@media only screen and (min-width:320px) and (max-width:992px){
+html,body {
+    overflow-x: hidden;
+}
+/* Thay đổi giao diện các box tổng người dùng - sản phẩm - đơn hàng - danh mục */
+/* .dashboardBoxesSlider .swiper-wrapper{overflow-x: scroll !important; white-space: nowrap; display: block !important;}
+.dashboardBoxesSlider .swiper-wrapper .swiper-slide{width:300px !important; display:inline-block; vertical-align: top;} */
+
+/* Phần Lọc sản phẩm - tìm kiếm phần sản phẩm trang chủ */
+.dashboardFilters{display: block !important; white-space: nowrap; overflow-x: scroll;}
+.dashboardFilters::-webkit-scrollbar{display: none !important;}
+.dashboardFilters .col{display: inline-block; vertical-align: top; width: 250px; padding-right: 15px;}
+.dashboardFilters .search_box{position: relative; top: 15px;}
+
+.sidebarOverlay{  pointer-events: inherit;}
+
+.btn-sm{ padding: 3px 10px !important; font-size: 11px !important;}
+.btn-lg{ padding: 5px 10px !important; font-size: 14px !important; }
+.btn{ padding: 5px 10px !important;  font-size: 12px !important;}
+.btn svg{ font-size: 15px !important;}
+
+.MuiPagination-root{  width: 80% !important;  margin: auto !important;}
+.MuiPagination-ul{  white-space: nowrap !important;  overflow-x: scroll !important;  display: block !important;  width: 100% !important;}
+.MuiPagination-ul li{  display: inline-block !important;  vertical-align: top !important;}
+
+.contentRight {padding-left: 15px !important;}
+.uploadBox h4{text-align: center;}
+
+}
+
+@media only screen and (min-width:320px) and (max-width:992px){
+/* Không cho TableHead xuống dòng - chức năng */
+.MuiTableCell-head { white-space: nowrap !important; overflow: hidden !important;}
+}
