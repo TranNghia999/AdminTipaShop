@@ -45,12 +45,14 @@ const AddProduct = () => {
     const [productSize, setProductSize] = React.useState([]);
     const [productSizeData, setProductSizeData] = React.useState([]);
 
+    // Hàm kết nối của Server
+    const context = useContext(MyContext);
     // Danh mục chính
     const handleChangeProductCat = (event) => {
     setProductCat(event.target.value);
     formFields.catId=event.target.value
     formFields.category=event.target.value
-  };
+    };
     const selectCatByName=(name)=>{
         formFields.catName=name
     }
@@ -63,7 +65,7 @@ const AddProduct = () => {
         formFields.subCat=name
     }
     // Danh mục Phụ Của Phụ***
-       const handleChangeProductThirdLavelCat = (event) => {
+    const handleChangeProductThirdLavelCat = (event) => {
         setProductThirdLavelCat(event.target.value);
         formFields.thirdsubCatId=event.target.value
     };
@@ -117,7 +119,7 @@ const AddProduct = () => {
         formFields.size = value;
   };
 
-       // Dữ Liệu Ram, weight, size
+    // Dữ Liệu Ram, weight, size
     useEffect(() => {
         fetchDataFromApi("/api/product/productRAMS/get").then((res) => {
             if (res?.error === false) {
@@ -139,8 +141,42 @@ const AddProduct = () => {
 
     }, []);
 
-  // Hàm kết nối của Server
-  const context = useContext(MyContext);
+  // Reset lại dữ liệu mỗi khi mở trang thêm sản phẩm (Phát viết)
+  useEffect(() => {
+    if (context?.isOpenFullScreenPanel?.open) {
+        setPreviews([]);
+        setBannerPreviews([]);
+        setCheckedSwitch(false);
+
+        setFormFields({
+            name: "",
+            description: "",
+            describe: "",
+            images: [],
+            brand1: "",
+            brand: "",
+            price: "",
+            oldPrice: "",
+            catName: "",
+            catId: "",
+            subCatId: "",
+            subCat: "",
+            thirdsubCat: "",
+            thirdsubCatId: "",
+            countInStock: "",
+            rating: "",
+            isFeatured: false,
+            discount: "",
+            productRam: [],
+            size: [],
+            productWeight: [],
+            bannerTitleName: "",
+            bannerimages: [],
+            isDisplayOnHomeBanner: false
+        });
+    }
+  }, [context?.isOpenFullScreenPanel?.open]);
+
   // Hàm Lịch Sử
   const history = useNavigate();
   // Của hiển thị hình ảnh dữ liệu
@@ -149,8 +185,8 @@ const AddProduct = () => {
   // Của Banner Ảnh
   const [bannerPreviews, setBannerPreviews] = useState([]);
 
-   // Của Viết Blog Nội dung
-    const editor = useRef(null);
+  // Của Viết Blog Nội dung
+  const editor = useRef(null);
  
   // Biểu mẫu của Sản Phẩm [ Nguồn cấp dữ liệu của FE ]
   const [formFields, setFormFields] = useState({
@@ -180,7 +216,7 @@ const AddProduct = () => {
     isDisplayOnHomeBanner:false
 })
 
-// Hàm nhập
+    // Hàm nhập
     const onChangeInput=(e) => {
         const { name, value } = e.target;
         setFormFields(() => {
@@ -287,62 +323,125 @@ const AddProduct = () => {
     }
 
        // ✅ Cập nhật ảnh khi Upload thành công
+    // const setPreviewsFun = (previewsArr) => {
+    //     // Gộp ảnh cũ và ảnh mới
+    //     const updatedImages = [...formFields.images, ...previewsArr];
+
+    //     // Cập nhật ảnh preview
+    //     setPreviews(updatedImages);
+
+    //     // Cập nhật vào formFields
+    //     setFormFields(prev => ({
+    //         ...prev,
+    //         images: updatedImages
+    //     }));
+    // };
+
+    // ✅ Cập nhật ảnh khi Upload thành công dùng cho publish server (Phát viết)
     const setPreviewsFun = (previewsArr) => {
-        // Gộp ảnh cũ và ảnh mới
-        const updatedImages = [...formFields.images, ...previewsArr];
+        setPreviews(prev => {
+            const updated = [...prev, ...previewsArr];
 
-        // Cập nhật ảnh preview
-        setPreviews(updatedImages);
+            setFormFields(form => ({
+                ...form,
+                images: updated
+            }));
 
-        // Cập nhật vào formFields
-        setFormFields(prev => ({
-            ...prev,
-            images: updatedImages
-        }));
+            return updated;
+        });
     };
 
-    // Cập Nhật ảnh của Ảnh Banner
-    const setBannerImagesFun = (previewsArr) => {
-        const imgArr = bannerPreviews;
-        for (let i = 0; i < previewsArr.length; i++) {
-            imgArr.push(previewsArr[i])
-        }
-        setBannerPreviews([])
-            setTimeout(() => {
-                setBannerPreviews(imgArr)
-                formFields.bannerimages = imgArr
-            }, 10);
-        }
-    
-        // ✅ Xoá ảnh ra khỏi UI & gọi API
-      const removeImg = (image,index) => {
-        var imageArr = [];
-            imageArr = previews;
-        deleteImages(`/api/category/deleteImage?img=${image}`).then((res)=>{
-        imageArr.splice(index,1);
-    
-        setPreviews([]);
-          setTimeout(() => {
-              setPreviews(imageArr);
-              formFields.images = imageArr
-            }, 100);
-          })
-        } 
 
-         // ✅ Xoá ảnh Banner ra khỏi UI & gọi API
-      const removeBannerImg = (image,index) => {
-        var imageArr = [];
-            imageArr = bannerPreviews;
-        deleteImages(`/api/category/deleteImage?img=${image}`).then((res)=>{
-        imageArr.splice(index,1);
+
+    // Cập Nhật ảnh của Ảnh Banner
+    // const setBannerImagesFun = (previewsArr) => {
+    //     const imgArr = bannerPreviews;
+    //     for (let i = 0; i < previewsArr.length; i++) {
+    //         imgArr.push(previewsArr[i])
+    //     }
+    //     setBannerPreviews([])
+    //         setTimeout(() => {
+    //             setBannerPreviews(imgArr)
+    //             formFields.bannerPreviews = imgArr
+    //         }, 10);
+    //     }
+
+    // Cập Nhật ảnh của Ảnh Banner dùng cho publish server (Phát viết)
+        const setBannerImagesFun = (previewsArr) => {
+            setBannerPreviews(prev => {
+                const updated = [...prev, ...previewsArr];
+
+                setFormFields(form => ({
+                    ...form,
+                    bannerimages: updated
+                }));
+
+                return updated;
+            });
+        };
+
+
+        // ✅ Xoá ảnh ra khỏi UI & gọi API
+    //   const removeImg = (image,index) => {
+    //     var imageArr = [];
+    //         imageArr = previews;
+    //     deleteImages(`/api/category/deleteImage?img=${image}`).then((res)=>{
+    //     imageArr.splice(index,1);
     
-        setBannerPreviews([]);
-          setTimeout(() => {
-              setBannerPreviews(imageArr);
-              formFields.bannerPreviews = imageArr
-            }, 100);
-          })
-        } 
+    //     setPreviews([]);
+    //       setTimeout(() => {
+    //           setPreviews(imageArr);
+    //           formFields.images = imageArr
+    //         }, 100);
+    //       })
+    //     }
+
+    // ✅ Xoá ảnh ra khỏi UI & gọi API dùng cho publish server (Phát viết)
+    const removeImg = (image, index) => {
+        deleteImages(`/api/category/deleteImage?img=${image}`).then(() => {
+            setPreviews(prev => {
+                const updated = prev.filter((_, i) => i !== index);
+
+                setFormFields(form => ({
+                    ...form,
+                    images: updated
+                }));
+
+                return updated;
+            });
+        });
+    };
+
+    // ✅ Xoá ảnh Banner ra khỏi UI & gọi API
+    //   const removeBannerImg = (image,index) => {
+    //     var imageArr = [];
+    //         imageArr = bannerPreviews;
+    //     deleteImages(`/api/category/deleteImage?img=${image}`).then((res)=>{
+    //     imageArr.splice(index,1);
+    
+    //     setBannerPreviews([]);
+    //       setTimeout(() => {
+    //           setBannerPreviews(imageArr);
+    //           formFields.bannerPreviews = imageArr
+    //         }, 100);
+    //       })
+    //     }
+
+    // ✅ Xoá ảnh Banner ra khỏi UI & gọi API dùng cho publish server (Phát viết)
+    const removeBannerImg = (image, index) => {
+        deleteImages(`/api/category/deleteImage?img=${image}`).then(() => {
+            setBannerPreviews(prev => {
+                const updated = prev.filter((_, i) => i !== index);
+
+                setFormFields(form => ({
+                    ...form,
+                    bannerimages: updated
+                }));
+
+                return updated;
+            });
+        });
+    };
 
          // Của Switch
     const [checkedSwitch, setCheckedSwitch] = useState(false);
