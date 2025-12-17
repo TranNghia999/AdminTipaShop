@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom';
+import { BsChatDots } from "react-icons/bs";
 import { RxDashboard } from "react-icons/rx";
 import Button from '@mui/material/Button';
 import { FaRegImage } from "react-icons/fa";
@@ -18,10 +19,6 @@ import { Collapse } from 'react-collapse';
 
 import { MyContext } from '../../App';
 import { fetchDataFromApi } from '../../utils/api';
-
-
-
-
 
 const Sidebar = () => {
 
@@ -400,7 +397,6 @@ const Sidebar = () => {
             </Link>
           </li>
 
-
           <li>
             <Link to="/" >
               <Button className='w-full !capitalize !justify-start flex gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500]  items-center !py-2 hover:!bg-[#f1f1f1]'
@@ -411,6 +407,20 @@ const Sidebar = () => {
             </Link>
           </li>
 
+          <li>
+            <Link to="/chat">
+              <Button className='w-full !capitalize !justify-start flex gap-3 text-[14px] !text-[rgba(0,0,0,0.8)] !font-[500]  items-center !py-2 hover:!bg-[#f1f1f1]'>
+                <BsChatDots size={20} />
+                <span>Trò chuyện</span>
+
+                {context.unreadChatCount > 0 && (
+                  <span className="absolute right-3 top-2 bg-red-500 text-white text-xs px-2 rounded-full">
+                    {context.unreadChatCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+          </li>
         </ul>
       </div>
 

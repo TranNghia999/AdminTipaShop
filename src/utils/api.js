@@ -149,3 +149,36 @@ export const formatCurrency = (value) => {
 
   return number.toLocaleString("vi-VN") + "đ";
 };
+
+const API_BASE = "https://tipashopbackend.duckdns.org";
+
+export async function getOrdersInfoByList(orderIds) {
+  try {
+    const res = await axios.post(
+      `${API_BASE}/api/user/orders/list/info`,
+      orderIds,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("✅ API success:", res);
+    return res.data;
+  } catch (err) {
+    console.error("❌ API error");
+    if (err.response) {
+      console.error("Status:", err.response.status);
+      console.error("Data:", err.response.data);
+      console.error("Headers:", err.response.headers);
+    } else if (err.request) {
+      console.error("No response received:", err.request);
+    } else {
+      console.error("Error message:", err.message);
+    }
+    throw err;
+  }
+}
+
+
+

@@ -1,11 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect, useMemo  } from 'react'
 import Button from "@mui/material/Button";
 
 // Icon
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import SearchBox from '../../Components/SearchBox';
-import { editData, fetchDataFromApi, formatCurrency } from '../../utils/api';
-
+import { editData, fetchDataFromApi, formatCurrency, getOrdersInfoByList } from '../../utils/api';
 // Trạng thái đơn hàng
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -25,28 +24,58 @@ const Orders = () => {
   const [totalOrdersData, setTotalOrdersData] = useState([]); // tất cả đơn (để search)
   const [pageOrder, setPageOrder] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [orderStatus, setOrderStatus] = useState("");
   const LIMIT = 5;
+  const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const [orderInfoLoading, setOrderInfoLoading] = useState(false);
+  const [listOrderInfo, setListOrderInfo] = useState();
+  const isOrderInfoReady = Array.isArray(listOrderInfo) && !orderInfoLoading;
+  const listOrderStatus = {pending: "Chờ xác nhận",confirm: "Đang giao hàng",delivered: "Đã giao hàng",};
 
   // Gọi API - backend trả về toàn bộ orders (không phân trang), vì vậy tính phân trang phía client
   useEffect(() => {
-    fetchDataFromApi("/api/order/order-list").then((res) => {
-      if (res?.error === false) {
-        const all = res?.data || [];
-        setTotalOrdersData(all);
+    const fetchOrders = async () => {
+      const res = await fetchDataFromApi("/api/order/order-list");
+      if (res?.error !== false) return;
 
-        const totalPages = Math.ceil((all?.length || 0) / LIMIT) || 1;
-        // lưu vào orders object để component Pagination dùng
-        setOrders({ ...res, totalPages });
+      const all = res.data || [];
+      setTotalOrdersData(all);
 
-        // slice data cho page hiện tại
-        const start = (pageOrder - 1) * LIMIT;
-        const pageData = all.slice(start, start + LIMIT);
-        setOrdersData(pageData);
+      const totalPages = Math.ceil(all.length / LIMIT) || 1;
+      setOrders({ ...res, totalPages });
+
+      const start = (pageOrder - 1) * LIMIT;
+      setOrdersData(all.slice(start, start + LIMIT));
+
+      setOrdersLoaded(true);
+    };
+
+    fetchOrders();
+  }, [pageOrder]);
+
+  useEffect(() => {
+    if (!ordersLoaded) return;
+    if (!ordersData.length) return;
+
+    const loadOrderInfo = async () => {
+      const orderIdList = ordersData
+        .map(o => o.orderId)
+        .filter(Boolean);
+
+      if (!orderIdList.length) return;
+
+      try {
+        setOrderInfoLoading(true);
+        const resp = await getOrdersInfoByList(orderIdList);
+        setListOrderInfo(resp);
+      } catch (err) {
+        console.error("❌ getOrdersInfoByList error", err);
+      } finally {
+        setOrderInfoLoading(false);
       }
-    });
-  }, [pageOrder, orderStatus]);
+    };
 
+    loadOrderInfo();
+  }, [ordersLoaded, ordersData]);
 
   // Tìm kiếm theo: id, email, tên người nhận, ngày tạo đơn
   useEffect(() => {
@@ -82,20 +111,26 @@ const Orders = () => {
 
   // Thay đổi trạng thái đơn hàng
   const handleChange = (event, id) => {
-    const obj = {
-      id: id,
+    editData(`/api/order/order-status/${id}`, {
+      id,
       order_status: event.target.value
-    };
-
-    editData(`/api/order/order-status/${id}`, obj).then((res) => {
+    }).then((res) => {
       if (res?.data?.error === false) {
         context.alertBox("success", res?.data?.message);
-        setOrderStatus(event.target.value);
       }
     });
   };
 
+  const orderInfoMap = useMemo(() => {
+    if (!isOrderInfoReady) return {};
 
+    return Object.fromEntries(
+      listOrderInfo.map(item => [
+        item.orderInfo.orderInfoId,
+        item.orderInfo
+      ])
+    );
+  }, [isOrderInfoReady, listOrderInfo]);
 
   return (
     <div className="card my-2 shadow-md sm:rounded-lg bg-white">
@@ -117,7 +152,7 @@ const Orders = () => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">  &nbsp; </th>
-              <th scope="col" className="px-6 py-3 whitespace-nowrap">  MÃ ĐƠN HÀNG  </th>
+              <th scope="col" className="px-6 py-3 whitespace-nowrap"> MÃ ĐƠN HÀNG  </th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> PHƯƠNG THỨC THANH TOÁN </th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> NGƯỜI NHẬN </th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> SỐ ĐIỆN THOẠI </th>
@@ -148,10 +183,10 @@ const Orders = () => {
                         </Button>
                       </td>
                       <td className="px-6 py-4 font-[500]">
-                        <span className='text-primary'>{order?._id}</span>
+                        <span className='text-primary'>{order?.orderId}</span>
                       </td>
                       <td className="px-6 py-4 font-[500]">
-                        <span className='text-primary whitespace-nowrap'>{order?.paymentId ? order?.paymentId : 'Thanh toán khi nhận hàng'}</span>
+                        <span className='text-primary whitespace-nowrap'>{order?.payment_status}</span>
                       </td>
 
                       <td className="px-6 py-4 font-[500] whitespace-nowrap"> {order?.delivery_address?.name}</td>
@@ -177,19 +212,42 @@ const Orders = () => {
                       </td>
 
                       <td className="px-6 py-4 font-[500]">
-                        <Select labelId="demo-simple-select-helper-label"
-                          id="demo-simple-select-helper"
-                          value={order?.order_status !== null ? order?.order_status : orderStatus}
-                          label="Status"
-                          size='small'
-                          className='w-full'
-                          style={{zoom: '80%'}}
-                          onChange={(e) => handleChange(e, order?._id)}
-                        >
-                          <MenuItem value={'pending'}>Chờ xác nhận</MenuItem>
-                          <MenuItem value={'confirm'}>Đang giao hàng</MenuItem>
-                          <MenuItem value={'delivered'}>Đã giao hàng</MenuItem>
-                        </Select>
+                        {isOrderInfoReady ? (
+                          (() => {
+                            const shipStatus = orderInfoMap[order?.orderId]?.statusName;
+                            const defaultLabel =
+                              listOrderStatus[order?.order_status] || "";
+
+                            const options = Array.from(
+                              new Set([
+                                ...Object.values(listOrderStatus),
+                                shipStatus
+                              ].filter(Boolean))
+                            );
+
+                            const displayValue = shipStatus || defaultLabel;
+
+                            return (
+                              <Select
+                                size="small"
+                                className="w-full"
+                                style={{ zoom: "80%" }}
+                                value={displayValue}
+                                onChange={(e) => handleChange(e, order?._id)}
+                              >
+                                {options.map(label => (
+                                  <MenuItem key={label} value={label}>
+                                    {label}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            );
+                          })()
+                          ) : (
+                          <span className="text-gray-400 italic">
+                            Đang đồng bộ trạng thái…
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 font-[500] whitespace-nowrap">{order?.createdAt?.split("T")[0]}</td>
                     </tr>
@@ -202,7 +260,7 @@ const Orders = () => {
                               <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                   <tr>
-                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">  MÃ SẢN PHẨM</th>
+                                    <th scope="col" className="px-6 py-3 whitespace-nowrap"> MÃ SẢN PHẨM</th>
                                     <th scope="col" className="px-6 py-3 whitespace-nowrap"> TÊN SẢN PHẨM</th>
                                     <th scope="col" className="px-6 py-3 whitespace-nowrap"> HÌNH ẢNH </th>
                                     <th scope="col" className="px-6 py-3 whitespace-nowrap"> SỐ LƯỢNG </th>
@@ -240,9 +298,6 @@ const Orders = () => {
                                       )
                                     }))
                                   }
-
-
-
                                   <tr>
                                     <td className='bg-[#f1f1f1]' colSpan="12"></td>
                                   </tr>
