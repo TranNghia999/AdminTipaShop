@@ -174,12 +174,10 @@ const Orders = () => {
                       <td className="px-6 py-4 font-[500]">
                         <Button className='!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-[#f1f1f1]'
                           onClick={() => isShowOrderdProduct(index)}>
-
                           {
                             isOpenOrderdProduct === index ? <FaAngleUp className='text-[16px] text-[rgba(0,0,0,0.7)]' /> :
                               <FaAngleDown className='text-[16px] text-[rgba(0,0,0,0.7)]' />
                           }
-
                         </Button>
                       </td>
                       <td className="px-6 py-4 font-[500]">

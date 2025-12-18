@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import UploadBox from "../../Components/UploadBox";
 // Mã [ Hình ảnh chỉ được tải khi cần thiết (người dùng cuộn tới) ]
 import { LazyLoadImage } from "react-lazy-load-image-component";
@@ -39,60 +39,76 @@ const AddCategory = () => {
   }
 
    // ✅ Cập nhật ảnh khi Upload thành công
-const setPreviewsFun = (previewsArr) => {
-  setPreviews(previewsArr)
-  formFields.images = previewsArr
-}
+  const setPreviewsFun = (previewsArr) => {
+    setPreviews(prev => {
+      const updated = [...prev, ...previewsArr];
+
+      setFormFields(form => ({
+        ...form,
+        images: updated
+      }));
+
+      return updated;
+    });
+  };
 
     // ✅ Xoá ảnh ra khỏi UI & gọi API
-  const removeImg = (image,index) => {
-    var imageArr = [];
-        imageArr = previews;
-    deleteImages(`/api/category/deleteImage?img=${image}`).then((res)=>{
-    imageArr.splice(index,1);
+  const removeImg = (image, index) => {
+    deleteImages(`/api/category/deleteImage?img=${image}`).then(() => {
+      setPreviews(prev => {
+        const updated = prev.filter((_, i) => i !== index);
 
-    setPreviews([]);
-      setTimeout(() => {
-          setPreviews(imageArr);
-          formFields.images = imageArr
-        }, 100);
-      })
+        setFormFields(form => ({
+          ...form,
+          images: updated
+        }));
+
+        return updated;
+      });
+    });
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit=(e)=>{
+    e.preventDefault();
+
+    setIsLoading(true);
+
+    if (formFields.name === "") {
+      context.alertBox("error", "Vui lòng nhập tên danh mục");
+      setIsLoading(false);
+      return false
     }
 
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit=(e)=>{
-      e.preventDefault();
-
-      setIsLoading(true);
-
-      if (formFields.name === "") {
-        context.alertBox("error", "Vui lòng nhập tên danh mục");
+    if (previews?.length === 0) {
+      context.alertBox("error", "Vui lòng chọn hình ảnh danh mục");
         setIsLoading(false);
-        return false
-      }
-
-      if (previews?.length === 0) {
-        context.alertBox("error", "Vui lòng chọn hình ảnh danh mục");
-         setIsLoading(false);
-        return false
-      }
-      // Nếu hợp lệ thì mới loading
-      
-      postData("/api/category/create",formFields).then((res)=>{
-        setTimeout(() => {
-          setIsLoading(false);
-
-           // Tự động đóng khi tải ảnh lên
-            context.setIsOpenFullScreenPanel({
-              open: false,
-            })
-            context?.getCat();
-            history("/category/list")
-        }, 2500);
-      })
+      return false
     }
+    // Nếu hợp lệ thì mới loading
+    
+    postData("/api/category/create",formFields).then((res)=>{
+      setTimeout(() => {
+        setIsLoading(false);
 
+          // Tự động đóng khi tải ảnh lên
+          context.setIsOpenFullScreenPanel({
+            open: false,
+          })
+          context?.getCat();
+          history("/category/list")
+      }, 2500);
+    })
+  }
+
+  useEffect(() => {
+    setPreviews([]);
+    setFormFields({
+      name: "",
+      images: []
+    });
+  }, []);
 
   return (
     <section className="p-5 bg-gray-50">
@@ -131,7 +147,6 @@ const setPreviewsFun = (previewsArr) => {
                 })
               }
             
-
             <UploadBox  multiple={true} 
                         name="images" 
                         url="/api/category/uploadImages" 
