@@ -8,7 +8,7 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 // Nút loading
 import CircularProgress from '@mui/material/CircularProgress';
 
-// Bảng UI Table
+
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -17,20 +17,20 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 
-// check box
+
 import Checkbox from "@mui/material/Checkbox";
 import { Link } from "react-router-dom";
 import SearchBox from "../../Components/SearchBox";
-// Kết nối
+
 import { MyContext } from "../../App";
 import { useState } from "react";
 import { useEffect } from "react";
 import { deleteMultipleData, fetchDataFromApi } from "../../utils/api";
 
-// của check box
+
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
-// các cột
+
 const columns = [
   { id: "userImg", label: "ẢNH ĐẠI DIỆN", minWidth: 150 },
   { id: "userName", label: "TÊN NGƯỜI DÙNG", minWidth: 150 },
@@ -111,18 +111,18 @@ const Users = () => {
 
 const [sortedIds, setSortedIds] = useState([]);
 
-   //Trình xử lý để chuyển đổi tất cả các hộp kiểm
+
     const handleSelectAll = (e) => {
         const isChecked = e.target.checked;
 
-        // Cập nhật trạng thái đã kiểm tra của tất cả các mục
+
         const updatedItems = userData.map((item) => ({
             ...item,
             checked: isChecked,
         }));
         setUserData(updatedItems);
 
-        // Cập nhật trạng thái ID đã sắp xếp
+
         if (isChecked) {
             const ids = updatedItems.map((item) => item._id).sort((a, b) => a - b);
             console.log(ids)
@@ -132,7 +132,7 @@ const [sortedIds, setSortedIds] = useState([]);
       }
     };
 
-    // Chọn 1 Sản phẩm ở checkbox
+
   const handleCheckboxChange = (e, id, index) => {
 
       const updatedItems = userData.map((item) =>
@@ -140,15 +140,15 @@ const [sortedIds, setSortedIds] = useState([]);
       );
       setUserData(updatedItems);
 
-      // Cập nhật trạng thái ID đã sắp xếp
+
       const selectedIds = updatedItems.filter((item) => 
                                       item.checked).map((item) => item._id).sort((a, b) => a - b);
                                       setSortedIds(selectedIds);
 
-     // console.log(selectedIds)
+
     };
 
-      // Xóa nhiều sản phẩm
+
   const deleteMultiple = () => {
     if (sortedIds.length === 0) {
         context.alertBox('error', 'Vui lòng chọn các mục để xóa.');
@@ -182,7 +182,7 @@ const [sortedIds, setSortedIds] = useState([]);
               {/* ==== MOBILE MODE (< 992px) ==== */}
               {context?.windowWidth < 992 && (
                 <>
-                  {/* Khi có chọn checkbox → hiện nút XÓA */}
+
                   {sortedIds.length > 0 && (
                     <Button
                       variant="contained"
@@ -195,14 +195,14 @@ const [sortedIds, setSortedIds] = useState([]);
                     </Button>
                   )}
 
-                  {/* Khi không chọn gì → chỉ hiện thanh tìm kiếm */}
+
                   {sortedIds.length === 0 && (
                     <SearchBox searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
                   )}
                 </>
               )}
 
-              {/* ==== DESKTOP MODE (>= 992px) ==== */}
+
               {context?.windowWidth >= 992 && (
                 <div className="w-full flex items-center gap-3">
                   {/* Có chọn → hiện nút XÓA */}
@@ -218,7 +218,7 @@ const [sortedIds, setSortedIds] = useState([]);
                     </Button>
                   )}
 
-                  {/* Luôn hiện SearchBox trên desktop */}
+
                   <SearchBox
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
@@ -292,10 +292,7 @@ const [sortedIds, setSortedIds] = useState([]);
                               </TableCell>
 
                               <TableCell style={{ minWidth: columns.minWidth }}>
-                                {/* <span className="flex items-center gap-2">
-                                    <MdOutlineMarkEmailRead />
-                                    {user?.email}
-                                </span> */}
+
                                  <span className="flex items-center gap-2" 
                                       style={{ color: "#2563eb", fontWeight: 400 }}>
                                   <MdOutlineMarkEmailRead className="text-[16px]" />
@@ -307,7 +304,7 @@ const [sortedIds, setSortedIds] = useState([]);
                               <TableCell style={{ minWidth: columns.minWidth }}>
                                   <span className="flex items-center gap-2">
                                     <MdLocalPhone />
-                                     {/* { user?.mobile === null ? 'Chưa Cập Nhật' : user?.mobile} */}
+
                                       <span className={
                                             !user?.mobile
                                               ? "font-semibold text-gray-500"

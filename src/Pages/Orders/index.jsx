@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 // Icon
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import SearchBox from '../../Components/SearchBox';
-import { editData, fetchDataFromApi, formatCurrency, getOrdersInfoByList } from '../../utils/api';
+import { editData, fetchDataFromApi, formatCurrency, getOrdersInfoByList, cancelOrder  } from '../../utils/api';
 // Trạng thái đơn hàng
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -13,6 +13,7 @@ import Pagination from "@mui/material/Pagination";
 
 // kết nối context API sử dụng dữ liệu toàn cục
 import { MyContext } from '../../App';
+import Swal from "sweetalert2";
 
 const Orders = () => {
 
@@ -33,22 +34,6 @@ const Orders = () => {
 
   // Gọi API - backend trả về toàn bộ orders (không phân trang), vì vậy tính phân trang phía client
   useEffect(() => {
-    const fetchOrders = async () => {
-      const res = await fetchDataFromApi("/api/order/order-list");
-      if (res?.error !== false) return;
-
-      const all = res.data || [];
-      setTotalOrdersData(all);
-
-      const totalPages = Math.ceil(all.length / LIMIT) || 1;
-      setOrders({ ...res, totalPages });
-
-      const start = (pageOrder - 1) * LIMIT;
-      setOrdersData(all.slice(start, start + LIMIT));
-
-      setOrdersLoaded(true);
-    };
-
     fetchOrders();
   }, [pageOrder]);
 
@@ -108,6 +93,21 @@ const Orders = () => {
   const isShowOrderdProduct = (index) =>
     setIsOpenOrderdProduct(isOpenOrderdProduct === index ? null : index);
 
+  const fetchOrders = async () => {
+        const res = await fetchDataFromApi("/api/order/all-order-list");
+        if (res?.error !== false) return;
+
+        const all = res.data || [];
+        setTotalOrdersData(all);
+
+        const totalPages = Math.ceil(all.length / LIMIT) || 1;
+        setOrders({ ...res, totalPages });
+
+        const start = (pageOrder - 1) * LIMIT;
+        setOrdersData(all.slice(start, start + LIMIT));
+
+        setOrdersLoaded(true);
+  };
 
   // Thay đổi trạng thái đơn hàng
   const handleChange = (event, id) => {
@@ -119,6 +119,40 @@ const Orders = () => {
         context.alertBox("success", res?.data?.message);
       }
     });
+  };
+
+  const handleCancelOrder = async (order) => {
+    const result = await Swal.fire({
+      title: "Xác nhận hủy đơn?",
+      text: `Bạn có chắc muốn hủy đơn hàng ${order?.orderId} không?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Hủy đơn",
+      cancelButtonText: "Không",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await cancelOrder({ soc: order?.orderId });
+
+      Swal.fire({
+        icon: "success",
+        title: "Đã hủy đơn hàng",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      fetchOrders(); 
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Hủy đơn thất bại",
+        text: error?.message || "Có lỗi xảy ra",
+      });
+    }
   };
 
   const orderInfoMap = useMemo(() => {
@@ -162,6 +196,7 @@ const Orders = () => {
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> MÃ NGƯỜI DÙNG</th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> TRẠNG THÁI</th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> NGÀY ĐẶT</th>
+              <th scope="col" className="px-6 py-3 whitespace-nowrap"> HÀNH ĐỘNG</th>
             </tr>
           </thead>
           <tbody>
@@ -174,10 +209,12 @@ const Orders = () => {
                       <td className="px-6 py-4 font-[500]">
                         <Button className='!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-[#f1f1f1]'
                           onClick={() => isShowOrderdProduct(index)}>
+
                           {
                             isOpenOrderdProduct === index ? <FaAngleUp className='text-[16px] text-[rgba(0,0,0,0.7)]' /> :
                               <FaAngleDown className='text-[16px] text-[rgba(0,0,0,0.7)]' />
                           }
+
                         </Button>
                       </td>
                       <td className="px-6 py-4 font-[500]">
@@ -248,6 +285,17 @@ const Orders = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 font-[500] whitespace-nowrap">{order?.createdAt?.split("T")[0]}</td>
+                      <td className="px-6 py-4 font-[500] text-center">
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          disabled={order?.order_status === "cancelled"}
+                          onClick={() => handleCancelOrder(order)}
+                        >
+                          Hủy đơn
+                        </Button>
+                      </td>
                     </tr>
                     {
                       isOpenOrderdProduct === index && (
@@ -308,7 +356,7 @@ const Orders = () => {
                       )}
                   </>
                 )
-})}
+              })}
           </tbody>
         </table>
       </div>

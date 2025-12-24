@@ -166,19 +166,41 @@ export async function getOrdersInfoByList(orderIds) {
     console.log("✅ API success:", res);
     return res.data;
   } catch (err) {
-    console.error("❌ API error");
-    if (err.response) {
-      console.error("Status:", err.response.status);
-      console.error("Data:", err.response.data);
-      console.error("Headers:", err.response.headers);
-    } else if (err.request) {
-      console.error("No response received:", err.request);
-    } else {
-      console.error("Error message:", err.message);
-    }
-    throw err;
+    console.error("❌ API error", err);
   }
 }
+
+export async function cancelOrder(payload) {
+  try {
+    // ===== SERVER 1 (KHÔNG AUTH) =====
+    const res = await axios.post(
+      `${API_BASE}/api/user/orders/cancel`,
+      payload
+    );
+
+    // ===== SERVER 2 (CẦN AUTH) =====
+    const params = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    await axios.post(
+      `${apiUrl}/api/order/cancel`,
+      payload,     // 👈 body
+      params       // 👈 headers (GIỐNG editData)
+    );
+
+    return res.data;
+
+  } catch (err) {
+    console.error("Error cancelling order:", err);
+    throw err.response?.data || err;
+  }
+}
+
+
 
 
 

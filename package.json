@@ -15,9 +15,9 @@
     "@mui/icons-material": "^7.1.1",
     "@mui/material": "^7.1.1",
     "@tailwindcss/vite": "^4.1.10",
-    "lucide-react": "^0.556.0",
     "axios": "^1.10.0",
     "jodit-react": "^5.2.19",
+    "lucide-react": "^0.556.0",
     "react": "^19.1.0",
     "react-collapse": "^5.1.1",
     "react-dom": "^19.1.0",
@@ -28,6 +28,7 @@
     "react-lazy-load-image-component": "^1.6.3",
     "react-router-dom": "^7.6.2",
     "recharts": "^2.15.3",
+    "sweetalert2": "^11.26.10",
     "swiper": "^11.2.10"
   },
   "devDependencies": {

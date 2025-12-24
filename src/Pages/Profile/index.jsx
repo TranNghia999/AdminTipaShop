@@ -3,30 +3,30 @@ import React, { useContext, useEffect, useState } from 'react'
 import  Button  from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Radio from '@mui/material/Radio';
-// Icon
+
 import { FaCloudUploadAlt } from "react-icons/fa";
 import CircularProgress from '@mui/material/CircularProgress';
-// Thêm định danh số đt
+
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 
-// Thanh thay đổi trạng thái mật khẩu
+
 import {Collapse} from 'react-collapse'; 
 
-// Kết nối API với server
+
 import { MyContext } from '../../App';
 import { editData, postData, uploadImage } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
 
-    // code kết nối API với server
+
     const context = useContext(MyContext)
 
     // code định danh số điện thoại
     const [phone, setPhone] = useState("");
 
-    // Tải lên hình ảnh
+
     const [previews, setPreviews] = useState([]);
     const [uploading, setUploading] = useState(false);
 
@@ -81,7 +81,7 @@ const Profile = () => {
                  console.log(error);
              }
          }
-    // Code Mật khẩu với đổi mật khẩu
+
 
     const [isLoading, setIsLoading] = useState(false);
     // Đặt lại mật khẩu
@@ -123,7 +123,7 @@ const Profile = () => {
 
    const valideValue = Object.values(formFields).every(el => el)
         
-            // Hàm kết nối API data
+
     const handleSubmit = (e) => {
                     e.preventDefault();
     
@@ -144,12 +144,12 @@ const Profile = () => {
         
               setIsLoading(true);
 
-             // ✅ Làm sạch số điện thoại
+
                 const cleanedPhone = phone
                     .replace(/^(\+84|84)0/, '+84') // +840xxxx → +84xxxx
                     .replace(/^0/, '+84');         // 0xxxx → +84xxxx
 
-                // ✅ Cập nhật lại vào formFields (không đổi biến gốc)
+
                 formFields.mobile = cleanedPhone;
         
                 editData(`/api/user/${userId}`, formFields, { withCredentials: true }).then((res) => {
@@ -212,13 +212,13 @@ const Profile = () => {
             })
         }
 
-        // Của dịa chỉ
+
     useEffect(() => {
         if (context?.userData?._id !== "" && context?.userData?._id !== undefined){
             setUserId(context?.userData?._id);
               
             const rawPhone = String(context.userData.mobile || '');
-            // Nếu bắt đầu bằng '0', thay bằng +84 (hoặc giữ nguyên nếu đã có mã quốc tế)
+
             const formattedPhone = rawPhone.startsWith('0')
                 ? '+84' + rawPhone.slice(1)
                 : rawPhone;
@@ -237,9 +237,9 @@ const Profile = () => {
             })
         }
     
-        }, [context?.userData]) // ✅ thêm context.address vào
+        }, [context?.userData])
 
-        // Của đăng nhập
+
     useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
@@ -264,7 +264,7 @@ const Profile = () => {
             
 
             <br />
-            {/* Đoạn chứa Ảnh của tài khoản */}
+
                 <div className='w-[110px] h-[110px] rounded-full overflow-hidden mb-4 relative group flex items-center justify-center bg-gray-200'>
                            
                             {
@@ -299,7 +299,7 @@ const Profile = () => {
                                  </div>
                 </div>
 
-            {/* Đoạn mã Thay đổi mật khẩu mới cũ */}
+
 
             <form className='form mt-8' onSubmit={handleSubmit}>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-5'>
@@ -326,7 +326,7 @@ const Profile = () => {
                         </div>
 
                         <div className='col'>
-                            {/* Sử dụng định danh số điện thoại */}
+
                            <PhoneInput
                                 defaultCountry="vn"
                                 value={phone}
@@ -338,7 +338,7 @@ const Profile = () => {
                                     mobile: phone
                                     }));
                                 }}
-                                // ✅ Không cho người dùng xóa mã quốc gia bằng bàn phím
+
                                 forceDialCode={true}
                                 disableDialCodePrefill={false}
                                 />

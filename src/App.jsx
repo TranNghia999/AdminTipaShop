@@ -4,7 +4,6 @@ import React, { useEffect } from 'react'
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { createContext, useState } from 'react';
 
-// Các Pages &  Components
 import Dashboard from './Pages/Dashboard';
 import Header from './Components/Header';
 import Sidebar from './Components/Sidebar';
@@ -28,10 +27,9 @@ import BannerV1List from './Pages/Banners/bannerV1List.jsx';
 import BlogList from './Pages/Blog/index.jsx';
 import AdminDashboard from './Pages/Chat/AdminDashBoard.jsx';
 
-// thông báo kết nối server
+
 import toast, { Toaster } from 'react-hot-toast';
 
-// API kết nối server với Admin
 import { fetchDataFromApi } from './utils/api.js';
 import BannerV2List from './Pages/Banners/bannerV2List.jsx';
 
@@ -42,20 +40,20 @@ const MyContext = createContext();
 
 function App() {
 
-  // Cấu hình màn hình
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  // Cấu hình Slide Trang chủ
+
   const [sidebarWidth, setSidebarWidth] = useState(18);
-  // code quản lý trạng thái mở/đóng sidebar
+
   const [ isSidebarOpen, setIsSidebarOpen ] = useState(false);
   const [ isLogin, setIsLogin ] = useState(false);
-  // Code của hồ sơ người dùng
+
   const [userData, setUserData] = useState(null);
-  // hiển thị Địa chỉ
+
     const [address, setAddress] = useState([]);
-  // Dữ hiển thị ở subcategory
+
   const [catData, setCatData] = useState([]);
-  // mở trang thái thêm sản phẩm toàn màn hình
+
   const [ isOpenFullScreenPanel, setIsOpenFullScreenPanel ] = useState({
      open: false ,
      id: ''
@@ -72,7 +70,7 @@ function App() {
       }
     }
 
-      // code của kết nối server api
+
   useEffect(()=>{
 
   const token = localStorage.getItem('accessToken');
@@ -161,29 +159,13 @@ function App() {
                               `w-[${sidebarWidth/1.5}%]`: `w-[${sidebarWidth}%]` : 'w-[0px] opacity-0'} transition-all`}>
                 <Sidebar/>
               </div>
-              {/* Code mới */}
-              {/* <div
-                  className={`overflow-hidden sidebarWrapper transition-all duration-300`}
-                  style={{
-                    width: isSidebarOpen ? `${sidebarWidth}%` : "0px",
-                    opacity: isSidebarOpen ? 1 : 0
-                  }} >
-                  <Sidebar />
-                </div> */}
+
 
               <div className={`contentRight py-4 px-5 ${isSidebarOpen === true && windowWidth < 992 && 'opacity-0'} 
                               ${isSidebarOpen === false ? 'w-[100%]' : `w-[${100 - sidebarWidth}%]`} transition-all`}>
                     <Dashboard />
                   </div>
-              {/* Code mới */}
-              {/* <div className="contentRight py-4 px-5 transition-all duration-300"
-                    style={{
-                      width: isSidebarOpen ? `${100 - sidebarWidth}%` : "100%",
-                      opacity: isSidebarOpen && windowWidth < 992 ? 0 : 1
-                    }}
-                >
-                  <Dashboard />
-                </div> */}
+
            </div>
       </section>
       </>

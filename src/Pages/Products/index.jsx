@@ -548,7 +548,7 @@ const handleCheckboxChange = (e, id, index) => {
                     <TableCell style={{ minWidth: columns.minWidth }}> 
                           
                             <p className="text-[14px] w-[100px]">
-                                  <span className="font-[600]"> {product?.sale}  </span> sale
+                                <span className="font-[600] text-[#FF6600]">Giảm {product?.discount}% </span>
                             </p>
                            
                     </TableCell>

@@ -1,19 +1,19 @@
 import React, {useContext} from 'react'
 import Button from '@mui/material/Button';
 import { RiMenu2Line } from "react-icons/ri";
-// code UI Thông Báo
+
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
-// Biểu tượng Thông báo
+
 import { FaRegBell } from "react-icons/fa";
-// Hộp Thoại Hiển thị
+
 import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { IoMdClose } from "react-icons/io";
-// Hiển Thị Trang Sản phẩm
+
 import AddProduct from '../../Pages/Products/addProduct';
 import AddHomeSlide from '../../Pages/HomeSliderBanners/addHomeSlide.jsx';
 import AddCategory from '../../Pages/Categegory/addCategory.jsx';
@@ -21,10 +21,10 @@ import AddSubCategory from '../../Pages/Categegory/addSubCategory.jsx';
 import AddAddress from '../../Pages/Address/addAddress.jsx';
 import EditCategory from '../../Pages/Categegory/editCategory.jsx';
 import AddBannerV1 from '../../Pages/Banners/addBannerV1.jsx';
-// Hiệu ứng chuyển của UI
+
 import Slide from '@mui/material/Slide';
 
-// code UI profile
+
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
@@ -115,7 +115,7 @@ const Header = () => {
                <div className='relative'>
             <div className='w-[35px]  h-[35px] rounded-full overflow-hidden cursor-pointer'
                 onClick={handleClickMyAcc}>
-              <img src='https://media.loveitopcdn.com/54/091609-thumb-15222092411420-ds-770.jpg' 
+              <img src={context?.userData?.avatar}
                   className='w-full h-full object-cover'/>
             </div>
 
@@ -158,7 +158,7 @@ const Header = () => {
         <MenuItem onClick={handleCloseMyAcc} className='!bg-white'>
           <div className='flex items-center gap-3'>
             <div className='w-[35px]  h-[35px] rounded-full overflow-hidden cursor-pointer'>
-              <img src='https://media.loveitopcdn.com/54/091609-thumb-15222092411420-ds-770.jpg' 
+              <img src={context?.userData?.avatar}
                   className='w-full h-full object-cover'/>
             </div>
             <div className='info'>

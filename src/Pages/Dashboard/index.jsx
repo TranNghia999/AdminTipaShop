@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import DashboardBoxes from "../../Components/DashboardBoxes";
 import Button from "@mui/material/Button";
  
@@ -42,7 +42,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 
 import { MyContext } from "../../App";
 import SearchBox from "../../Components/SearchBox";
-import { editData, fetchDataFromApi, formatCurrency } from "../../utils/api";
+import { editData, fetchDataFromApi, formatCurrency, getOrdersInfoByList } from "../../utils/api";
 import Products from "../Products";
 
 const Dashboard = () => {
@@ -182,13 +182,17 @@ useEffect(() => {
   const [pageOrder, setPageOrder] = useState(1);
   const [orderStatus, setOrderStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [ordersLoaded, setOrdersLoaded] = useState(false);
+  const [orderInfoLoading, setOrderInfoLoading] = useState(false);
+  const [listOrderInfo, setListOrderInfo] = useState();
+  const isOrderInfoReady = Array.isArray(listOrderInfo) && !orderInfoLoading;
   const LIMIT = 5;
   // Của Thanh tìm kiếm sản phẩm
   const [productTotalData, setproductTotalData] = useState([]);
 
   // Gọi API - backend trả về toàn bộ orders (không phân trang), vì vậy tính phân trang phía client
   useEffect(() => {
-    fetchDataFromApi("/api/order/order-list").then((res) => {
+    fetchDataFromApi("/api/order/all-order-list").then((res) => {
       if (res?.error === false) {
         const all = res?.data || [];
         setTotalOrdersData(all);
@@ -201,6 +205,8 @@ useEffect(() => {
         const start = (pageOrder - 1) * LIMIT;
         const pageData = all.slice(start, start + LIMIT);
         setOrdersData(pageData);
+
+        setOrdersLoaded(true);
       }
     });
 
@@ -239,6 +245,31 @@ useEffect(() => {
     setOrdersData(filtered);
   }, [searchQuery]);
 
+  useEffect(() => {
+      if (!ordersLoaded) return;
+      if (!ordersData.length) return;
+  
+      const loadOrderInfo = async () => {
+        const orderIdList = ordersData
+          .map(o => o.orderId)
+          .filter(Boolean);
+  
+        if (!orderIdList.length) return;
+  
+        try {
+          setOrderInfoLoading(true);
+          const resp = await getOrdersInfoByList(orderIdList);
+          setListOrderInfo(resp);
+        } catch (err) {
+          console.error("❌ getOrdersInfoByList error", err);
+        } finally {
+          setOrderInfoLoading(false);
+        }
+      };
+  
+      loadOrderInfo();
+    }, [ordersLoaded, ordersData]);
+
   const isShowOrderdProduct = (index) =>
     setIsOpenOrderdProduct(isOpenOrderdProduct === index ? null : index);
 
@@ -257,7 +288,7 @@ useEffect(() => {
     });
   };
    
-      useEffect(() => {
+  useEffect(() => {
       // Filter orders based on search query
       if (searchQuery != "") {
         const filteredOrders = productTotalData?.filter((product) =>
@@ -276,6 +307,16 @@ useEffect(() => {
         }
   }, [searchQuery]);
 
+  const orderInfoMap = useMemo(() => {
+      if (!isOrderInfoReady) return {};
+
+      return Object.fromEntries(
+        listOrderInfo.map(item => [
+          item.orderInfo.orderInfoId,
+          item.orderInfo
+        ])
+      );
+    }, [isOrderInfoReady, listOrderInfo]);
 
   return (
     <>
@@ -304,9 +345,9 @@ useEffect(() => {
                           category={context?.catData?.length} />
 
       }
-{/* Thành phần Sản phẩm */}
+      {/* Thành phần Sản phẩm */}
         <Products/>    
-{/* Thành Phần Lịch sử đơn hàng*/}
+      {/* Thành Phần Lịch sử đơn hàng*/}
 
       <div className="card my-4 shadow-md sm:rounded-lg bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2 px-5 py-5 flex-col sm:flex-row">
@@ -327,7 +368,7 @@ useEffect(() => {
           <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">  &nbsp; </th>
-              <th scope="col" className="px-6 py-3 whitespace-nowrap">  MÃ ĐƠN HÀNG  </th>
+              <th scope="col" className="px-6 py-3 whitespace-nowrap"> MÃ ĐƠN HÀNG  </th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> PHƯƠNG THỨC THANH TOÁN </th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> NGƯỜI NHẬN </th>
               <th scope="col" className="px-6 py-3 whitespace-nowrap"> SỐ ĐIỆN THOẠI </th>
@@ -358,10 +399,10 @@ useEffect(() => {
                         </Button>
                       </td>
                       <td className="px-6 py-4 font-[500]">
-                        <span className='text-primary'>{order?._id}</span>
+                        <span className='text-primary'>{order?.orderId}</span>
                       </td>
                       <td className="px-6 py-4 font-[500]">
-                        <span className='text-primary whitespace-nowrap'>{order?.paymentId ? order?.paymentId : 'Thanh toán khi nhận hàng'}</span>
+                        <span className='text-primary whitespace-nowrap'>{order?.payment_status}</span>
                       </td>
 
                       <td className="px-6 py-4 font-[500] whitespace-nowrap"> {order?.delivery_address?.name}</td>
@@ -379,16 +420,26 @@ useEffect(() => {
                         </span>
                       </td>
 
-                      <td className="px-6 py-4 font-[500]">{formatCurrency(order?.totalAmt)}</td>
+                     <td className="px-6 py-4 font-[500]">{formatCurrency(order?.totalAmt)}</td>
                       <td className="px-6 py-4 font-[500]">{order?.userId?.email}</td>
 
                       <td className="px-6 py-4 font-[500]">
                         <span className='text-primary'>{order?.userId?._id}</span>
                       </td>
-
                       <td className="px-6 py-4 font-[500]">
-                        <Badge status={order?.order_status} />
-                      </td>
+                        {isOrderInfoReady ? (
+                          (() => {
+                            const shipStatus = orderInfoMap[order?.orderId]?.statusName;
+                            return (
+                            <Badge status={shipStatus} />
+                            );
+                          })()
+                          ) : (
+                          <span className="text-gray-400 italic">
+                            Đang đồng bộ trạng thái…
+                          </span>
+                        )}
+                        </td>
                       <td className="px-6 py-4 font-[500] whitespace-nowrap">{order?.createdAt?.split("T")[0]}</td>
                     </tr>
                     {
@@ -454,7 +505,7 @@ useEffect(() => {
                       )}
                   </>
                 )
-})}
+              })}
           </tbody>
         </table>
       </div>

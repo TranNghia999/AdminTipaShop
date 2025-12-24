@@ -1,17 +1,17 @@
 import React, { useContext, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
-// icon
+
 import { CgLogIn } from "react-icons/cg";
 import { FaRegUser } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { BsFacebook } from "react-icons/bs";
 import { FaRegEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
-// checkbox
+
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-// API kết nối
+
 import CircularProgress from '@mui/material/CircularProgress';
 import { postData } from '../../utils/api';
 import { MyContext } from '../../App';
@@ -28,10 +28,10 @@ const [loadingFb, setLoadingFb] = React.useState(false);
 function handleClickFb() {
     setLoadingFb(true);
   }
-// ẩn hiện mat khẩu
+
 const [isPasswordShow, setIsPasswordShow] = useState(false);
 
-// Kết nối API với server
+
 const context = useContext(MyContext)
 const history = useNavigate();
 
@@ -55,7 +55,7 @@ const [formFields, setFormFields] = useState({
 
     const valideValue = Object.values(formFields).every(el => el)
 
-      // Hàm kết nối API data
+
         const handleSubmit = (e) => {
             e.preventDefault();
 
@@ -68,7 +68,7 @@ const [formFields, setFormFields] = useState({
             return false
             }
 
-                // Đã Thêm Mật khẩu nâng cao tại đây
+
      const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
             if (!strongPasswordRegex.test(formFields.password)) {
@@ -152,16 +152,7 @@ const [formFields, setFormFields] = useState({
                          Đăng nhập bằng Google
                         </Button>
 
-                      {/* <Button
-                            size="small"
-                            onClick={handleClickFb}
-                            endIcon={<BsFacebook className='!text-[#1877F2]' />}
-                            loading={loadingFb}
-                            loadingPosition="end"
-                            variant="outlined"
-                            className='!bg-none !py-2 !text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)] '>
-                         Signin With Facebook
-                        </Button> */}
+
                 </div>
 
                 <br/>   
