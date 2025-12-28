@@ -18,7 +18,6 @@ import AddProduct from '../../Pages/Products/addProduct';
 import AddHomeSlide from '../../Pages/HomeSliderBanners/addHomeSlide.jsx';
 import AddCategory from '../../Pages/Categegory/addCategory.jsx';
 import AddSubCategory from '../../Pages/Categegory/addSubCategory.jsx';
-import AddAddress from '../../Pages/Address/addAddress.jsx';
 import EditCategory from '../../Pages/Categegory/editCategory.jsx';
 import AddBannerV1 from '../../Pages/Banners/addBannerV1.jsx';
 
